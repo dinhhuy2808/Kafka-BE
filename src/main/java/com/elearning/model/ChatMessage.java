@@ -1,4 +1,4 @@
-package info.wondee.kafkachat;
+package com.elearning.model;
 
 import java.util.Date;
 

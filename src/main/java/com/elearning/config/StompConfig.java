@@ -1,4 +1,4 @@
-package info.wondee.kafkachat;
+package com.elearning.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -21,8 +21,5 @@ public class StompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 		registry.setApplicationDestinationPrefixes("/api");
 		registry.enableSimpleBroker("/chat");
 	} 
-	
-
-
 	
 }

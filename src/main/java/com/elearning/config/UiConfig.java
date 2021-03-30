@@ -1,4 +1,4 @@
-package info.wondee.kafkachat;
+package com.elearning.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

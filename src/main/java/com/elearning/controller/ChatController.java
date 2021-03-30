@@ -1,4 +1,4 @@
-package info.wondee.kafkachat;
+package com.elearning.controller;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.elearning.model.ChatMessage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
