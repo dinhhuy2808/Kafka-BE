@@ -7,15 +7,13 @@ import org.springframework.context.annotation.Import;
 import com.elearning.config.KafkaConfig;
 import com.elearning.config.StompConfig;
 import com.elearning.config.UiConfig;
-import com.elearning.config.WebSecurityConfig;
 
 
 @SpringBootApplication
 @Import({
 		KafkaConfig.class, 
 		UiConfig.class,
-		StompConfig.class,
-		WebSecurityConfig.class
+		StompConfig.class
 	})
 public class KafkaChatApplication {
 
