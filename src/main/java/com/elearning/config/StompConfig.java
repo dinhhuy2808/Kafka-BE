@@ -19,7 +19,7 @@ public class StompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.setApplicationDestinationPrefixes("/api");
-		registry.enableSimpleBroker("/chat");
+		registry.enableSimpleBroker("/chat","/friend-request");
 	} 
 	
 }

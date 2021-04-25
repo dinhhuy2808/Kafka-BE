@@ -39,6 +39,7 @@ import com.google.common.collect.Lists;
 public class ChatController {
 
 	private static final String KAFKA_CHAT_TOPIC = "kafka-chat";
+	private static final String KAFKA_UNREAD_TOPIC = "kafka-unread";
 
 	private static final String REDIS_CHATROOM_PREFIX = "Chatroom-";
 
@@ -58,6 +59,7 @@ public class ChatController {
 			body.setRoom(chatroom);
 			
 			kafkaTemplate.send(KAFKA_CHAT_TOPIC, body).get();
+			kafkaTemplate.send(KAFKA_UNREAD_TOPIC, body).get();
 			
 			String redisKey = REDIS_CHATROOM_PREFIX + chatroom;
 			

@@ -15,6 +15,8 @@ public class ChatMessage {
 	
 	private String room;
 	
+	private String userKey;
+
 	public String getText() {
 		return text;
 	}
@@ -43,6 +45,11 @@ public class ChatMessage {
 	public String toString() {
 		return "ChatMessage [text=" + text + ", time=" + time + ", user=" + user + ", room=" + room + "]";
 	}
-	
+	public String getUserKey() {
+		return userKey;
+	}
+	public void setUserKey(String userKey) {
+		this.userKey = userKey;
+	}
 	
 }
