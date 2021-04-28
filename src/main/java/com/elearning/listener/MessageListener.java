@@ -30,6 +30,6 @@ public class MessageListener {
 	// flexible like requestHandler (see javadoc)
 	@KafkaListener(id="unread-listener",topics="kafka-unread")
 	public void listenUnread(ChatMessage message) {
-		template.convertAndSend("/chat/" + message.getUserKey(), String.format("{\"room\":\"%s\"}", message.getRoom()));
+		template.convertAndSend("/chat/" + message.getUserKey(), message);
 	}
 }
