@@ -1,15 +1,12 @@
 package com.elearning.controller;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -17,7 +14,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -29,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.elearning.model.ChatMessage;
+import com.elearning.model.GameRequest;
 import com.elearning.util.Util;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -37,14 +33,13 @@ import com.google.common.collect.Lists;
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @RestController
 @RequestMapping("/api")
-public class ChatController {
+public class GameController {
 
-	private static final String KAFKA_CHAT_TOPIC = "kafka-chat";
-	private static final String KAFKA_UNREAD_TOPIC = "kafka-unread";
+	private static final String KAFKA_GAME_TOPIC = "kafka-game";
 
-	private static final String REDIS_CHATROOM_PREFIX = "Chatroom-";
+	private static final String REDIS_GAMEROOM_PREFIX = "gameroom-";
 
-	private static final String REDIS_CHATROOM_PATTERN = REDIS_CHATROOM_PREFIX + "*";
+	private static final String REDIS_CHATROOM_PATTERN = REDIS_GAMEROOM_PREFIX + "*";
 
 	@Autowired
 	private KafkaTemplate<Integer, String> kafkaTemplate;
@@ -54,20 +49,17 @@ public class ChatController {
 	
 	@Autowired
 	private Util util;
-
-	@RequestMapping(value="/room/{chatroom}/message", method=RequestMethod.POST, consumes="application/json", produces="application/json")
-	public HttpEntity<ChatMessage> sendMessage(@PathVariable String chatroom, @RequestBody ChatMessage body) {
+	
+	@RequestMapping(value="/game/send-request", method=RequestMethod.POST, consumes="application/json", produces="application/json")
+	public HttpEntity<GameRequest> sendRequest(@RequestBody GameRequest body) {
 
 		try {
-			body.setTime(new Date());
-			body.setRoom(chatroom);
 			
-			kafkaTemplate.send(KAFKA_CHAT_TOPIC, util.objectToJSON(body)).get();
-			kafkaTemplate.send(KAFKA_UNREAD_TOPIC, util.objectToJSON(body)).get();
+			kafkaTemplate.send(KAFKA_GAME_TOPIC, util.objectToJSON(body)).get();
 			
-			String redisKey = REDIS_CHATROOM_PREFIX + chatroom;
+			String redisKey = REDIS_GAMEROOM_PREFIX + body.getGameRoomKey();
 			
-			redisTemplate.opsForSet().add(redisKey, body.getUser());
+			redisTemplate.opsForSet().add(redisKey, body.getHostName());
 			redisTemplate.expire(redisKey, 10, TimeUnit.MINUTES);
 			
 			
@@ -79,43 +71,27 @@ public class ChatController {
 		
 	}
 	
-	@RequestMapping(value="/room", method=RequestMethod.GET, produces="application/json")
-	public Map<String, Set<String>> getChatrooms() {
-		SetOperations<String, String> ops = redisTemplate.opsForSet();
-		
-		return 
-			redisTemplate.keys(REDIS_CHATROOM_PATTERN)
-				.stream()
-				.collect(
-					Collectors.toMap(
-						name -> name.substring(REDIS_CHATROOM_PREFIX.length()), 
-						name -> ops.members(name)
-					)
-				);
-	}
 	
-	
-	@RequestMapping(value="/room/{chatroom}", method=RequestMethod.GET, produces="application/json")
-	public List<ChatMessage> getChatroom(@PathVariable String chatroom) {
+	@RequestMapping(value="/game/{gameRoomKey}", method=RequestMethod.GET, produces="application/json")
+	public List<GameRequest> getGameroom(@PathVariable String gameRoomKey) {
 		
 		Consumer<Integer, String> consumer = new KafkaConsumer<>(consumerConfigs(), null, new JsonDeserializer<>(String.class));
 		
-		consumer.subscribe(Arrays.asList(KAFKA_CHAT_TOPIC));
+		consumer.subscribe(Arrays.asList(KAFKA_GAME_TOPIC));
 		
-		ConsumerRecords<Integer, String> records = consumer.poll(10000);
+		ConsumerRecords<Integer, String> records = consumer.poll(1000);
 		Iterator<ConsumerRecord<Integer, String>> iter = records.iterator();
 		
 		System.out.println("received "+ records.count() + " messages ");
 		
-		List<ChatMessage> result = Lists.newArrayListWithExpectedSize(records.count());
+		List<GameRequest> result = Lists.newArrayListWithExpectedSize(records.count());
 		
 		while (iter.hasNext()) {
 			ConsumerRecord<Integer,String> next = iter.next();
 			String json = next.value();
-			ChatMessage msg = util.jsonToObject(json, ChatMessage.class);
-			
-			if (chatroom.equals(msg.getRoom())) {
-				result.add(msg);
+			GameRequest msg = util.jsonToObject(json, GameRequest.class);
+			if (gameRoomKey.equals(msg.getGameRoomKey())) {
+				result.add(0, msg);
 			}
 		}
 		
@@ -123,13 +99,7 @@ public class ChatController {
 		
 		return result;
 	}
-//
-//	public static void main(String[] args) {
-//		List<ChatMessage> chatroom = new ChatController().getChatroom("kafka-chat");
-//		
-//		chatroom.forEach(room -> System.out.println(room));
-//	}
-//	
+	
 	private Map<String, Object> consumerConfigs() {
 
 		return ImmutableMap.<String, Object>builder()

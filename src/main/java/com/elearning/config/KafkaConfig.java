@@ -16,7 +16,6 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import com.elearning.model.ChatMessage;
 import com.google.common.collect.ImmutableMap;
 
 @EnableKafka
@@ -24,12 +23,12 @@ import com.google.common.collect.ImmutableMap;
 public class KafkaConfig {
 
 	@Bean
-	public ProducerFactory<Integer, ChatMessage> producerFactory() {
-		return new DefaultKafkaProducerFactory<>(producerConfigs(), null, new JsonSerializer<ChatMessage>());
+	public ProducerFactory<Integer, String> producerFactory() {
+		return new DefaultKafkaProducerFactory<>(producerConfigs(), null, new JsonSerializer<String>());
 	}
 
 	@Bean
-	public KafkaTemplate<Integer, ChatMessage> kafkaTemplate() {
+	public KafkaTemplate<Integer, String> kafkaTemplate() {
 		return new KafkaTemplate<>(producerFactory());
 	}
 
@@ -47,15 +46,15 @@ public class KafkaConfig {
 	}
 
 	@Bean
-	public ConcurrentKafkaListenerContainerFactory<Integer, ChatMessage> kafkaListenerContainerFactory() {
-		ConcurrentKafkaListenerContainerFactory<Integer, ChatMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
+	public ConcurrentKafkaListenerContainerFactory<Integer, String> kafkaListenerContainerFactory() {
+		ConcurrentKafkaListenerContainerFactory<Integer, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
 		return factory;
 	}
 
 	@Bean
-	public ConsumerFactory<Integer, ChatMessage> consumerFactory() {
-		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), null, new JsonDeserializer<>(ChatMessage.class));
+	public ConsumerFactory<Integer, String> consumerFactory() {
+		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), null, new JsonDeserializer<>(String.class));
 	}
 
 	@Bean

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public class ChatMessage {
+public class ChatMessage extends KafkaMessage {
 	
 	private String text;
 	
