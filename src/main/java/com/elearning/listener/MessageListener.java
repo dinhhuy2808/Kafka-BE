@@ -41,6 +41,10 @@ public class MessageListener {
 	@KafkaListener(id="game-request-listener",topics="kafka-game")
 	public void listenGameRequest(String json) {
 		GameRequest request = util.jsonToObject(json, GameRequest.class);
+		for (Gamer gamer : request.getGamers()) {
+			GameRequestResponse response = new GameRequestResponse(request.getHostName(), request.getGameRoomKey());
+			template.convertAndSend("/game/request/" + gamer.getUserKey(),response);
+		}
 		template.convertAndSend("/game/request/" + request.getGameRoomKey(),request);
 	}
 }

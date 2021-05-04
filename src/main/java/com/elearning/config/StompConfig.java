@@ -13,13 +13,13 @@ public class StompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/messages").setAllowedOrigins("http://localhost:4200").withSockJS();
+		registry.addEndpoint("/messages").setAllowedOrigins("http://localhost:4100", "http://localhost:4200").withSockJS();
 	}
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.setApplicationDestinationPrefixes("/api");
-		registry.enableSimpleBroker("/chat","/friend-request");
+		registry.enableSimpleBroker("/chat","/game");
 	} 
 	
 }
