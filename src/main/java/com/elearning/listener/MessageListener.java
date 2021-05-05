@@ -6,6 +6,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.elearning.model.ChatMessage;
+import com.elearning.model.GameInteractCode;
+import com.elearning.model.GameInteractRequest;
 import com.elearning.model.GameRequest;
 import com.elearning.model.GameRequestResponse;
 import com.elearning.model.Gamer;
@@ -46,5 +48,14 @@ public class MessageListener {
 			template.convertAndSend("/game/request/" + gamer.getUserKey(),response);
 		}
 		template.convertAndSend("/game/request/" + request.getGameRoomKey(),request);
+	}
+	
+	@KafkaListener(id="game-interact-listener",topics="kafka-game-interact")
+	public void listenGameInteractRequest(String json) {
+		GameInteractRequest request = util.jsonToObject(json, GameInteractRequest.class);
+		if (request.getCode().equals(GameInteractCode.START)) {
+			template.convertAndSend("/game/interact/" + request.getBody(),GameInteractCode.START.name());
+		}
+		
 	}
 }

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.elearning.model.GameInteractRequest;
 import com.elearning.model.GameRequest;
 import com.elearning.util.Util;
 import com.google.common.collect.ImmutableMap;
@@ -36,6 +37,7 @@ import com.google.common.collect.Lists;
 public class GameController {
 
 	private static final String KAFKA_GAME_TOPIC = "kafka-game";
+	private static final String KAFKA_GAME_INTERACT_TOPIC = "kafka-game-interact";
 
 	private static final String REDIS_GAMEROOM_PREFIX = "gameroom-";
 
@@ -71,6 +73,20 @@ public class GameController {
 		
 	}
 	
+	@RequestMapping(value="/game/interact", method=RequestMethod.POST, consumes="application/json", produces="application/json")
+	public HttpEntity<GameInteractRequest> interact(@RequestBody GameInteractRequest body) {
+
+		try {
+			
+			kafkaTemplate.send(KAFKA_GAME_INTERACT_TOPIC, util.objectToJSON(body)).get();
+			
+		} catch (InterruptedException | ExecutionException e) {
+			throw new RuntimeException(e);
+		}
+		
+		return new HttpEntity<>(body);
+		
+	}
 	
 	@RequestMapping(value="/game/{gameRoomKey}", method=RequestMethod.GET, produces="application/json")
 	public List<GameRequest> getGameroom(@PathVariable String gameRoomKey) {
