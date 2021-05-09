@@ -53,8 +53,9 @@ public class MessageListener {
 	@KafkaListener(id="game-interact-listener",topics="kafka-game-interact")
 	public void listenGameInteractRequest(String json) {
 		GameInteractRequest request = util.jsonToObject(json, GameInteractRequest.class);
-		if (request.getCode().equals(GameInteractCode.START)) {
-			template.convertAndSend("/game/interact/" + request.getBody(),GameInteractCode.START.name());
+		if (request.getCode().equals(GameInteractCode.START)
+				|| request.getCode().equals(GameInteractCode.ROUNDSTOP)) {
+			template.convertAndSend("/game/interact/" + request.getBody(),request.getCode().name());
 		}
 		
 	}

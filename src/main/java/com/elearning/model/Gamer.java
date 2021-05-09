@@ -5,6 +5,7 @@ public class Gamer {
 	private String avatar;
 	private String name;
 	private Boolean ready;
+	private Integer score;
 	public String getUserKey() {
 		return userKey;
 	}
@@ -28,6 +29,12 @@ public class Gamer {
 	}
 	public void setReady(Boolean ready) {
 		this.ready = ready;
+	}
+	public Integer getScore() {
+		return score;
+	}
+	public void setScore(Integer score) {
+		this.score = score;
 	}
 	
 }
