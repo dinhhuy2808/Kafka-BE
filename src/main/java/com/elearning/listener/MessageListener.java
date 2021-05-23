@@ -5,6 +5,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import com.elearning.model.ChangeRuleGame;
 import com.elearning.model.ChatMessage;
 import com.elearning.model.GameInteractCode;
 import com.elearning.model.GameInteractRequest;
@@ -43,9 +44,13 @@ public class MessageListener {
 	@KafkaListener(id="game-request-listener",topics="kafka-game")
 	public void listenGameRequest(String json) {
 		GameRequest request = util.jsonToObject(json, GameRequest.class);
+		int i = 0;
 		for (Gamer gamer : request.getGamers()) {
-			GameRequestResponse response = new GameRequestResponse(request.getHostName(), request.getGameRoomKey());
-			template.convertAndSend("/game/request/" + gamer.getUserKey(),response);
+			if (i != 0) {
+				GameRequestResponse response = new GameRequestResponse(request.getHostName(), request.getGameRoomKey());
+				template.convertAndSend("/game/request/" + gamer.getUserKey(),response);
+			}
+			i++;
 		}
 		template.convertAndSend("/game/request/" + request.getGameRoomKey(),request);
 	}
@@ -55,7 +60,10 @@ public class MessageListener {
 		GameInteractRequest request = util.jsonToObject(json, GameInteractRequest.class);
 		if (request.getCode().equals(GameInteractCode.START)
 				|| request.getCode().equals(GameInteractCode.ROUNDSTOP)) {
-			template.convertAndSend("/game/interact/" + request.getBody(),request.getCode().name());
+			template.convertAndSend("/game/interact/" + request.getBody(),request);
+		} else if (request.getCode().equals(GameInteractCode.CHANGE_RULE)) {
+			ChangeRuleGame rule = util.jsonToObject(request.getBody(), ChangeRuleGame.class);
+			template.convertAndSend("/game/interact/" + rule.getGameKey(),request);
 		}
 		
 	}
