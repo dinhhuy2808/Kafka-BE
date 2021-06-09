@@ -133,7 +133,7 @@ public class ChatController {
 	private Map<String, Object> consumerConfigs() {
 
 		return ImmutableMap.<String, Object>builder()
-					.put("bootstrap.servers", "localhost:9092")
+					.put("bootstrap.servers", "localhost:29092")
 					.put("key.deserializer", IntegerDeserializer.class)
 					.put("value.deserializer", JsonDeserializer.class)
 					.put("auto.offset.reset", "earliest")
